@@ -60,6 +60,7 @@ const FEATURED_BRANDS: Array<{
   cuisines: Cuisine[];
   officialUrl: string;
   photoUrl: string;
+  curatedDescription: string;
 }> = [
   {
     key: 'mcdonalds',
@@ -68,6 +69,7 @@ const FEATURED_BRANDS: Array<{
     cuisines: ['Fast Food', 'Burgers'],
     officialUrl: 'https://www.mcdonalds.com/us/en-us.html',
     photoUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1200&q=80',
+    curatedDescription: 'Iconic burgers, fries, and quick breakfasts—reliable, fast, and easy to find across Miami.',
   },
   {
     key: 'burgerking',
@@ -76,6 +78,7 @@ const FEATURED_BRANDS: Array<{
     cuisines: ['Fast Food', 'Burgers'],
     officialUrl: 'https://www.bk.com/',
     photoUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1200&q=80',
+    curatedDescription: 'Flame-grilled favorites (hello, Whopper) with lots of customizable combos for a quick bite.',
   },
   {
     key: 'kfc',
@@ -84,6 +87,7 @@ const FEATURED_BRANDS: Array<{
     cuisines: ['Fast Food', 'Chicken'],
     officialUrl: 'https://www.kfc.com/',
     photoUrl: 'https://images.unsplash.com/photo-1604908176997-125f25cc5001?auto=format&fit=crop&w=1200&q=80',
+    curatedDescription: 'Crispy fried chicken classics—great when you want something hearty and shareable.',
   },
   {
     key: 'chipotle',
@@ -92,6 +96,7 @@ const FEATURED_BRANDS: Array<{
     cuisines: ['Fast Food', 'Mexican'],
     officialUrl: 'https://www.chipotle.com/',
     photoUrl: 'https://images.unsplash.com/photo-1604908177522-040d2d5e2fc5?auto=format&fit=crop&w=1200&q=80',
+    curatedDescription: 'Build-your-own burritos and bowls with fresh toppings—fast, filling, and easy to tailor.',
   },
 ];
 
@@ -337,6 +342,20 @@ out center;
     );
   };
 
+  const applyCuratedBrand = (brandKey: FeaturedBrandKey) => {
+    const brand = FEATURED_BRANDS.find((b) => b.key === brandKey);
+    if (!brand) return;
+
+    setQuery(brand.displayName);
+    setSelectedCuisine('All');
+    setDistanceFilter('All');
+    setSelectedSpotId(null);
+
+    // Smooth scroll to the map so users can see nearby pins.
+    const el = document.getElementById('dining-map');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
       <Stack spacing={2} sx={{ mb: 3 }}>
@@ -348,6 +367,77 @@ out center;
           and an interactive map. Pins are loaded from OpenStreetMap.
         </Typography>
       </Stack>
+
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+          Best Places to Eat
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Curated picks with photos, quick descriptions, and official links. Tap “Show nearby” to filter the map pins.
+        </Typography>
+
+        <Grid container spacing={2}>
+          {FEATURED_BRANDS.map((b) => (
+            <Grid key={b.key} item xs={12} sm={6} md={3}>
+              <Card variant="outlined" sx={{ height: '100%' }}>
+                <CardActionArea onClick={() => applyCuratedBrand(b.key)}>
+                  <CardMedia component="img" height={160} image={b.photoUrl} alt={b.displayName} loading="lazy" />
+                  <CardContent>
+                    <Stack spacing={1}>
+                      <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                        <Link
+                          href={b.officialUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          underline="hover"
+                          sx={{ fontWeight: 900, fontSize: 16 }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {b.displayName}
+                        </Link>
+                        <OpenInNew fontSize="small" color="action" />
+                      </Stack>
+
+                      <Typography variant="body2" color="text.secondary">
+                        {b.curatedDescription}
+                      </Typography>
+
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                        {b.cuisines.map((c) => (
+                          <Chip key={`${b.key}-${c}`} size="small" label={c} />
+                        ))}
+                      </Stack>
+
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            applyCuratedBrand(b.key);
+                          }}
+                        >
+                          Show nearby
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          href={b.officialUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Official site
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
       <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
         {FEATURED_BRANDS.map((b) => (
@@ -370,6 +460,7 @@ out center;
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={12} md={8}>
           <Box
+            id="dining-map"
             sx={{
               height: 420,
               borderRadius: 2,

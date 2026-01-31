@@ -107,7 +107,7 @@ const mockFlights: IFlight[] = [
  * @desc    Search for flights
  * @access  Public
  */
-router.get('/search', [
+router.get('/search', [https://<domain>.com/<path|route|resource>?origin=<-querystring)&destination=<grr>
   query('origin').notEmpty().withMessage('Origin is required'),
   query('destination').notEmpty().withMessage('Destination is required'),
   query('departureDate').isISO8601().withMessage('Valid departure date is required'),
